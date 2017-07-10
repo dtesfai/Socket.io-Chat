@@ -4,28 +4,30 @@
 
   <!-- Basic Page Needs
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <meta charset="utf-8">
+  <meta charset='utf-8'>
   <title>Socket.IO chat</title>
-  <meta name="description" content="">
-  <meta name="author" content="">
+  <meta name='description' content=''>
+  <meta name='author' content=''>
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
 
   <!-- FONT
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="stylesheet" href="css/normalize.css">
-  <link rel="stylesheet" href="css/skeleton.css">
+  <!-- <link rel='stylesheet' href='css/normalize.css'>
+  <link rel='stylesheet' href='css/skeleton.css'> -->
+  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' integrity='sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u' crossorigin='anonymous'>
+  <link rel='stylesheet' href='css/index.css'>
 
   <style>
     /** { margin: 0; padding: 0; box-sizing: border-box; }*/
     body { font: 13px Helvetica, Arial; }
-    /*form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }*/
+    form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
     /*form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }*/
     /*form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }*/
     #messages { list-style-type: none; margin: 0; padding: 0; }
@@ -36,31 +38,24 @@
 
   <!-- JS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-  <script src="./user.js"></script>
+  <script src='/socket.io/socket.io.js'></script>
+  <script src='https://code.jquery.com/jquery-1.11.1.js'></script>
+  <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js' integrity='sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa' crossorigin='anonymous'></script>
+  <script src='./user.js'></script>
   <script>
     $(function () {
-
-      // Generating a random username
-      var user = "";
-      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-      for( var i=0; i < 3; i++ )
-          user += possible.charAt(Math.floor(Math.random() * possible.length));
 
       // creating io socket
       var socket = io();
 
       // letting others know that user connected, prints you connected to localhost
-      socket.emit('connection', user + ' connected', user);
-      $('#messages').append($('<li>').text("you connected"));
-
+      socket.emit('connection');
+      $('#messages').append($('<li>').text('you connected'));
 
       // runs when user is typing
       $('#m').on('keydown', function(e){
         if(e.keyCode != 13){
-          socket.emit('typing', user + "is typing")
+          socket.emit('typing')
         }
       });
 
@@ -77,8 +72,7 @@
 
       // when message sent, stored in variable and displayed to localhost screen, sent as chat message to 
       $('form').submit(function(){
-        var msg = user + ": " + $('#m').val();
-        $('#messages').append($('<li>').text(msg));
+        var msg = ': ' + $('#m').val();
         socket.emit('chat message', msg);
         $('#m').val('');
         return false;
@@ -91,16 +85,16 @@
       // want to show msg when typing, hide when not
       socket.on('typing', function(msg){
         $('#typing').text(msg);
-        $("#typing").show();
+        $('#typing').show();
       });
 
       socket.on('not typing', function(msg){
-        $("#typing").hide();
+        $('#typing').hide();
       });
 
       socket.on('online', function(arr){
-        $("#online").empty();
-        document.getElementById('online').appendChild(makeUL(arr));
+        var list = document.getElementById('online');
+        list.innerHTML = populateList(arr);
       });
 
     });
@@ -108,7 +102,7 @@
 
   <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel='icon' type='image/png' href='images/favicon.png'>
 
 </head>
 
@@ -117,20 +111,22 @@
 
   <!-- Primary Page Layout
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <div class="container">
-    <div class="row">
-      <div class="nine columns" style="margin-top: 25%">
-        <ul id="messages"></ul>
-        <p id="typing" style="color:grey"></p>
-        <form action="">
-          <input style='width:85%;' id="m" autocomplete="off" />
-          <button>Send</button>
-        </form>
+  <div class='container-fluid'>
+    <div class='row'>
+      <div class='col-md-8' style='margin-top: 25%'>
+        <ul id='messages' class='text-center'></ul>
+        <p id='typing' style='color:grey'></p>
       </div>
-      <div class="three columns" style="margin-top: 25%">
-        <h3>Online</h3>
-        <ul id="online"></ul>
+      <div id='online-div' class='col-md-4 text-center' style='margin-top: 25%'>
+        <h3 class=>Online</h3>
+        <ul id='online'></ul>
       </div>
+    </div>
+    <div class='row text-center'>
+      <form action=''>
+        <input style='width:95%;' id='m' autocomplete='off' />
+        <button>Send</button>
+      </form>
     </div>
   </div>
 

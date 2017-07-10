@@ -5,6 +5,7 @@ var io = require('socket.io')(http);
 var user = require("./user");
 
 var online = [];
+var users = {};
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html');
@@ -18,28 +19,37 @@ app.get('/user.js', function(req, res) {
 
 io.on('connection', function(socket){
 
-  socket.on('connection', function(msg, user){
-    socket.broadcast.emit('message', msg);
+  socket.on('connection', function(){
+    // Generating a random username
+    var user = '';
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-    online.push(user);
+    for( var i=0; i < 3; i++ )
+        user += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    users[socket.id] = user;
+
+    socket.broadcast.emit('message', users[socket.id] + ' connected');
+
+    online.push(users[socket.id]);
     io.emit('online', online);
   });
 
   socket.on('disconnect', function(){
-    socket.broadcast.emit('message', 'user disconnected');
+    socket.broadcast.emit('message', users[socket.id] + ' disconnected');
 
-    // need to display username in message that user disconnected 
-    // also remove from online list
+    var index = online.indexOf(users[socket.id]);
+    online.splice(index, 1);
     
-    // io.emit('offline', user);
+    io.emit('online', online);
   });
 
   socket.on('chat message', function(msg){
-    socket.broadcast.emit('message', msg);
+    io.emit('message', users[socket.id] + msg);
   });
 
-  socket.on('typing', function(msg){
-    socket.broadcast.emit('typing', msg);
+  socket.on('typing', function(){
+    socket.broadcast.emit('typing', users[socket.id] + ' is typing');
   });
 
   socket.on('not typing', function(){
