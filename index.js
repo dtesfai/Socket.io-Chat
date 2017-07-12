@@ -2,18 +2,13 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var user = require("./user");
 
 var online = [];
 var users = {};
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html');
-  app.use(express.static(__dirname + '/public'));
-});
-
-app.get('/user.js', function(req, res) {
-  res.sendFile(__dirname + '/user.js');
+  app.use(express.static(__dirname + '/'));
 });
 
 
@@ -28,6 +23,8 @@ io.on('connection', function(socket){
         user += possible.charAt(Math.floor(Math.random() * possible.length));
 
     users[socket.id] = user;
+
+    socket.emit('cookie', 'userID', users[socket.id])
 
     socket.broadcast.emit('message', users[socket.id] + ' connected');
 
@@ -45,7 +42,7 @@ io.on('connection', function(socket){
   });
 
   socket.on('chat message', function(msg){
-    io.emit('message', users[socket.id] + msg);
+    socket.broadcast.emit('message', msg);
   });
 
   socket.on('typing', function(){
@@ -57,7 +54,6 @@ io.on('connection', function(socket){
   });
 
 });
-
 
 http.listen(3000, function(){
   console.log('listening on *:3000');
