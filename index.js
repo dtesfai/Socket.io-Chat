@@ -24,7 +24,7 @@ io.on('connection', function(socket){
 
     users[socket.id] = user;
 
-    socket.emit('cookie', 'userID', users[socket.id])
+    socket.emit('user', users[socket.id])
 
     socket.broadcast.emit('message', users[socket.id] + ' connected');
 

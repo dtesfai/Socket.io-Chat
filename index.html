@@ -60,7 +60,9 @@
 
       var typingTimer;                //timer identifier
       var doneTypingInterval = 2000;  //time in ms (5 seconds)
-      
+
+      var user = null;
+
       // check every 1/2 second if user still typing (WIP)
       $('#m').keyup(function(){
           clearTimeout(typingTimer);
@@ -72,10 +74,10 @@
       // when message sent, stored in variable and displayed to localhost screen, sent as chat message to 
       $('form').submit(function(){
         var msg = ': ' + $('#m').val();
-        var user = Cookies.get('userID');
+        // var user = Cookies.get('userID');
         
         $('#messages').append($('<li>').text(user + msg));
-        socket.emit('chat message', user +  msg);
+        socket.emit('chat message', user + msg);
         $('#m').val('');
         return false;
       });
@@ -94,8 +96,8 @@
         $('#typing').hide();
       });
 
-      socket.on('cookie', function(name, value){
-        Cookies.set(name, value);
+      socket.on('user', function(value){
+        user = value;
       });
 
       socket.on('online', function(arr){
@@ -119,11 +121,12 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <div class='container-fluid'>
     <div class='row'>
+      <div class='col-md-2'></div>
       <div class='col-md-8' style='margin-top: 25%'>
         <ul id='messages' class='text-center'></ul>
         <p id='typing' style='color:grey'></p>
       </div>
-      <div id='online-div' class='col-md-4 text-center' style='margin-top: 25%'>
+      <div id='online-div' class='col-md-2 text-center' style='margin-top: 25%'>
         <h3 class=>Online</h3>
         <ul id='online'></ul>
       </div>
@@ -135,8 +138,5 @@
       </form>
     </div>
   </div>
-
-  
-
 </body>
 </html>
